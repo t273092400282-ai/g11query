@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نشاط تفاعلي - استعلام بيانات معالم الكويت (الصف الحادي عشر)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Tajawal & Cairo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* تأثيرات حركية مخصصة */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(236, 72, 153, 0.4); }
+            50% { box-shadow: 0 0 28px rgba(168, 85, 247, 0.7); }
+        }
+        @keyframes bounceShort {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-float {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+        .glow-effect {
+            animation: pulseGlow 3s infinite;
+        }
+        .bounce-hover:hover {
+            animation: bounceShort 0.5s ease infinite;
+        }
+
+        /* تنسيق كود بايثون */
+        .code-font {
+            font-family: 'Courier New', Courier, monospace;
+            direction: ltr;
+            text-align: left;
+        }
+        
+        /* تدرجات ألوان أنثوية زاهية */
+        .bg-girl-gradient {
+            background: linear-gradient(135deg, #fdf2f8 0%, #f5f3ff 50%, #eff6ff 100%);
+        }
+        .card-gradient {
+            background: linear-gradient(145deg, #ffffff, #fdf4ff);
+        }
+
+        /* شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fdf2f8;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d946ef;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c026d3;
+        }
+    </style>
+</head>
+<body class="bg-girl-gradient min-h-screen text-slate-800 flex flex-col justify-between selection:bg-pink-300 selection:text-pink-900">
+
+    <!-- نافذة منبثقة للشهادة ولوحة التشجيع (تظهر عند الانتهاء) -->
+    <div id="celebrationModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 md:p-8 text-center shadow-2xl border-4 border-pink-400 relative overflow-hidden animate-float">
+            <div class="absolute -top-10 -right-10 w-36 h-36 bg-pink-100 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-36 h-36 bg-purple-100 rounded-full blur-2xl"></div>
+            
+            <div class="w-20 h-20 bg-gradient-to-tr from-pink-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-3xl shadow-lg">
+                🏆
+            </div>
+            <h2 class="text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600 mb-2">
+                مـبــارك يا متميزة! 🎉
+            </h2>
+            <p class="text-slate-600 text-sm md:text-base mb-4 font-semibold">
+                لقد أنجزتِ ورقة عمل (7) بنجاح فائق ونفذتِ استعلام معالم الكويت باحترافية!
+            </p>
+
+            <div class="bg-pink-50/80 border-2 border-dashed border-pink-300 rounded-2xl p-4 mb-5 text-right space-y-2">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">اسم المبرمجة:</span>
+                    <span id="certName" class="font-bold text-pink-700 text-base">طالبة المعرفة</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">الصف:</span>
+                    <span id="certClass" class="font-bold text-purple-700 text-base">١١ / علمي</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">المهارة:</span>
+                    <span class="font-bold text-emerald-600">استرجاع البيانات بلغة Python و SQLite</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">الدرجة المستحقة:</span>
+                    <span class="font-black text-amber-500 text-lg">⭐⭐⭐⭐⭐ 100/100</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="window.print()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition transform active:scale-95 flex items-center gap-2 text-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    طباعة بطاقة الإنجاز
+                </button>
+                <button onclick="closeModal()" class="bg-pink-100 text-pink-700 hover:bg-pink-200 font-bold py-2.5 px-6 rounded-xl transition text-sm">
+                    إغلاق والرجوع للتطبيق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- رأس الصفحة وبيانات المتعلمة -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-pink-200 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+                <!-- الشعار والعنوان -->
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-tr from-pink-500 to-rose-400 rounded-2xl flex items-center justify-center shadow-md text-2xl text-white transform hover:rotate-6 transition">
+                        🇰🇼
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="bg-pink-100 text-pink-700 text-xs px-2.5 py-0.5 rounded-full font-bold">ورقة عمل (7)</span>
+                            <span class="bg-purple-100 text-purple-700 text-xs px-2.5 py-0.5 rounded-full font-bold">الصف الحادي عشر</span>
+                        </div>
+                        <h1 class="text-lg md:text-xl font-black text-slate-800">
+                            الاستعلام عن معالم الكويت <span class="text-pink-600">Kuwait_landmarks.db</span>
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- مدخلات الاسم والصف بتصميم جذاب وواضح -->
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-56">
+                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-pink-400">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                        </span>
+                        <input type="text" id="studentNameInput" placeholder="اكتبي اسمكِ الجميل هنا..." oninput="updateStudentInfo()" 
+                            class="w-full pr-9 pl-3 py-2 text-sm bg-pink-50/60 border border-pink-300 rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none transition font-medium">
+                    </div>
+                    <div class="relative w-36">
+                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-purple-400">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a10.99 10.99 0 014.25-1.551 1 1 0 00-.5-1.939 9 9 0 00-3.5 1.25V4.608l4.5-1.928 4.5 1.928v1.202a9 9 0 00-3.5-1.25 1 1 0 00-.5 1.939 10.99 10.99 0 014.25 1.551l2.644-1.131a1 1 0 000-1.84l-7-3zM4 9v4a6 6 0 0012 0V9a8.96 8.96 0 01-6 2.292A8.96 8.96 0 014 9z"></path></svg>
+                        </span>
+                        <input type="text" id="studentClassInput" placeholder="الصف (١١/...)" oninput="updateStudentInfo()"
+                            class="w-full pr-9 pl-3 py-2 text-sm bg-purple-50/60 border border-purple-300 rounded-xl focus:ring-2 focus:ring-purple-400 focus:outline-none transition font-medium">
+                    </div>
+                    <!-- شارة التقدم -->
+                    <div class="bg-gradient-to-r from-amber-400 to-amber-500 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs flex items-center gap-1 shadow-sm">
+                        <span>النقاط:</span>
+                        <span id="scoreText" class="text-sm">0/100</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى التفاعلي الرئيسي -->
+    <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-1">
+        
+        <!-- بطاقة التعريف والهدف التعليمي -->
+        <div class="card-gradient rounded-3xl p-5 mb-6 border border-pink-200 shadow-sm relative overflow-hidden">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="space-y-1 text-center md:text-right">
+                    <span class="text-xs font-bold text-pink-600 bg-pink-100 px-3 py-1 rounded-full">المعالجة الرقمية - بايثون وقواعد البيانات</span>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800">
+                        مرحباً بكِ في مختبر البرمجة الذكي لمعالم كويتنا الحبيبة! 🌸
+                    </h2>
+                    <p class="text-slate-600 text-sm">
+                        المطلوب: استعلام عن عمودي اسم المعلم <code class="text-pink-600 font-bold bg-pink-50 px-1 rounded">name</code> وسنة الإنشاء <code class="text-pink-600 font-bold bg-pink-50 px-1 rounded">year</code> لجميع صفوف المعالم الثقافية <code class="text-purple-600 font-bold bg-purple-50 px-1 rounded">'Cultural'</code> فقط من جدول <code class="text-indigo-600 font-bold bg-indigo-50 px-1 rounded">landmarks</code> مستخدمين دالة <code class="text-pink-600 font-bold">fetchall()</code>.
+                    </p>
+                </div>
+                <!-- أيقونة متحركة تعبيرية -->
+                <div class="flex items-center gap-2 text-4xl bg-white p-3 rounded-2xl shadow-sm border border-pink-100 animate-float">
+                    🏛️ 🇰🇼 💻
+                </div>
+            </div>
+        </div>
+
+        <!-- مخطط الجدول Landmarks (المأخوذ من شكل 55 في ورقة العمل) -->
+        <div class="bg-white rounded-3xl p-5 mb-6 border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+                    <h3 class="font-black text-slate-800 text-sm md:text-base flex items-center gap-1.5">
+                        <svg class="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path></svg>
+                        مخطط حقول جدول معالم الكويت: <span class="text-indigo-600">landmarks</span>
+                    </h3>
+                </div>
+                <span class="text-xs bg-slate-100 text-slate-500 font-bold px-2 py-1 rounded-lg">شكل (55) بالكتاب المدرسي</span>
+            </div>
+            
+            <!-- أزرار حقول الجدول تفاعلية (باتجاه من اليسار لليمين LTR) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 text-center text-xs" dir="ltr">
+                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-pink-50 transition" dir="rtl">
+                    <span class="block text-slate-400 font-bold text-[10px]">مفتاح أساسي</span>
+                    <span class="font-black text-slate-700 text-sm font-mono" dir="ltr">id</span>
+                    <span class="block text-slate-400 font-mono" dir="ltr">INTEGER</span>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-pink-100/80 border-2 border-pink-400 shadow-sm transform scale-105" dir="rtl">
+                    <span class="block text-pink-600 font-bold text-[10px]">✨ مطلوب بالاستعلام</span>
+                    <span class="font-black text-pink-700 text-sm font-mono" dir="ltr">name</span>
+                    <span class="block text-pink-500 font-semibold text-[10px]">TEXT (اسم المعلم)</span>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-pink-50 transition" dir="rtl">
+                    <span class="block text-slate-400 font-bold text-[10px]">الموقع</span>
+                    <span class="font-black text-slate-700 text-sm font-mono" dir="ltr">location</span>
+                    <span class="block text-slate-400 font-mono" dir="ltr">TEXT</span>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-purple-100/80 border-2 border-purple-400 shadow-sm transform scale-105" dir="rtl">
+                    <span class="block text-purple-600 font-bold text-[10px]">🎯 شرط التصفية</span>
+                    <span class="font-black text-purple-700 text-sm font-mono" dir="ltr">category</span>
+                    <span class="block text-purple-500 font-semibold text-[10px]">TEXT (فئة المعلم)</span>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-pink-100/80 border-2 border-pink-400 shadow-sm transform scale-105" dir="rtl">
+                    <span class="block text-pink-600 font-bold text-[10px]">✨ مطلوب بالاستعلام</span>
+                    <span class="font-black text-pink-700 text-sm font-mono" dir="ltr">year</span>
+                    <span class="block text-pink-500 font-semibold text-[10px]">INTEGER (سنة الإنشاء)</span>
+                </div>
+                <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-pink-50 transition" dir="rtl">
+                    <span class="block text-slate-400 font-bold text-[10px]">سعر الدخول</span>
+                    <span class="font-black text-slate-700 text-sm font-mono" dir="ltr">price</span>
+                    <span class="block text-slate-400 font-mono" dir="ltr">REAL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- مساحة كتابة الحل والتنفيذ التفاعلي -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- العمود الأيمن: المكان المخصص لكتابة الحل مع مساعد التلميحات الذكي -->
+            <div class="lg:col-span-7 space-y-5">
+                
+                <div class="bg-white rounded-3xl p-5 md:p-6 border-2 border-pink-300 shadow-md relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4 border-b border-pink-100 pb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-2xl bg-gradient-to-tr from-pink-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                ✍️
+                            </span>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-base md:text-lg">
+                                    مساحة كتابة الحل البرمجي
+                                </h3>
+                                <p class="text-xs text-slate-500">اكتبي الأوامر المطلوبة بيدكِ وراقبي ظهورها في محرر الكود لحظياً:</p>
+                            </div>
+                        </div>
+                        <span id="typingStatusBadge" class="text-xs bg-pink-50 text-pink-700 font-bold px-3 py-1 rounded-full border border-pink-200">
+                            بانتظار كتابة الحل
+                        </span>
+                    </div>
+
+                    <!-- خانة كتابة الخطوة 1: جملة الاستعلام SQL -->
+                    <div class="mb-4 bg-pink-50/40 p-4 rounded-2xl border border-pink-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label for="inputQuery" class="text-xs md:text-sm font-black text-slate-700 flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-pink-600 text-white flex items-center justify-center text-[11px]">١</span>
+                                <span>اكتبي جملة الاستعلام داخل <code class="code-font text-pink-600 bg-white px-1.5 py-0.5 rounded border border-pink-200 text-xs">cursor.execute("...")</code>:</span>
+                            </label>
+                            <span class="text-[11px] text-pink-500 font-semibold">(الحقول: name, year والشرط Cultural)</span>
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="inputQuery" oninput="onStudentTyping()" 
+                                placeholder='SELECT name, year FROM landmarks WHERE category = "Cultural"'
+                                class="w-full p-3 text-xs md:text-sm code-font bg-white border-2 border-pink-200 rounded-xl focus:ring-2 focus:ring-pink-400 focus:border-pink-400 focus:outline-none transition font-semibold text-slate-800">
+                        </div>
+                        <!-- أزرار مساعدة سريعة للرمز عند الكتابة على الأجهزة المحمولة -->
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                            <span class="text-slate-400 font-bold text-[10px]">كلمات مساعدة للمساعدة بالكتابة:</span>
+                            <button onclick="insertSnippet('inputQuery', 'SELECT name, year ')" class="bg-white hover:bg-pink-100 text-pink-700 px-2 py-0.5 rounded-lg border border-pink-200 font-mono transition">SELECT name, year</button>
+                            <button onclick="insertSnippet('inputQuery', 'FROM landmarks ')" class="bg-white hover:bg-pink-100 text-pink-700 px-2 py-0.5 rounded-lg border border-pink-200 font-mono transition">FROM landmarks</button>
+                            <button onclick="insertSnippet('inputQuery', 'WHERE category = \'Cultural\'')" class="bg-white hover:bg-pink-100 text-pink-700 px-2 py-0.5 rounded-lg border border-pink-200 font-mono transition">WHERE category = 'Cultural'</button>
+                        </div>
+                    </div>
+
+                    <!-- خانة كتابة الخطوة 2: دالة الاسترجاع fetchall -->
+                    <div class="mb-4 bg-purple-50/40 p-4 rounded-2xl border border-purple-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label for="inputFetch" class="text-xs md:text-sm font-black text-slate-700 flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[11px]">٢</span>
+                                <span>اكتبي تعليمة جلب السجلات وتخزينها في متغير <code class="code-font text-purple-600 bg-white px-1.5 py-0.5 rounded border border-purple-200 text-xs">rows</code>:</span>
+                            </label>
+                            <span class="text-[11px] text-purple-500 font-semibold">(استخدمي دالة fetchall)</span>
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="inputFetch" oninput="onStudentTyping()" 
+                                placeholder="rows = cursor.fetchall()"
+                                class="w-full p-3 text-xs md:text-sm code-font bg-white border-2 border-purple-200 rounded-xl focus:ring-2 focus:ring-purple-400 focus:border-purple-400 focus:outline-none transition font-semibold text-slate-800">
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                            <span class="text-slate-400 font-bold text-[10px]">مساعدة:</span>
+                            <button onclick="insertSnippet('inputFetch', 'rows = cursor.fetchall()')" class="bg-white hover:bg-purple-100 text-purple-700 px-2 py-0.5 rounded-lg border border-purple-200 font-mono transition">rows = cursor.fetchall()</button>
+                        </div>
+                    </div>
+
+                    <!-- خانة كتابة الخطوة 3: حلقة الطباعة for -->
+                    <div class="mb-5 bg-indigo-50/40 p-4 rounded-2xl border border-indigo-200 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs md:text-sm font-black text-slate-700 flex items-center gap-1.5">
+                                <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[11px]">٣</span>
+                                <span>اكتبي حلقة التكرار لطباعة كل سجل (الصف) في سطر منفصل:</span>
+                            </label>
+                            <span class="text-[11px] text-indigo-500 font-semibold">(for loop + print)</span>
+                        </div>
+                        <div class="space-y-1.5">
+                            <input type="text" id="inputLoopHeader" oninput="onStudentTyping()" 
+                                placeholder="for row in rows:"
+                                class="w-full p-2.5 text-xs md:text-sm code-font bg-white border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none transition font-semibold text-slate-800">
+                            
+                            <div class="flex items-center gap-2">
+                                <span class="text-[11px] font-bold text-slate-400 bg-slate-100 px-2 py-1.5 rounded-lg shrink-0">مسافة بادئة ⇥</span>
+                                <input type="text" id="inputLoopBody" oninput="onStudentTyping()" 
+                                    placeholder="    print(row)"
+                                    class="w-full p-2.5 text-xs md:text-sm code-font bg-white border-2 border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 focus:outline-none transition font-semibold text-slate-800">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                            <span class="text-slate-400 font-bold text-[10px]">مساعدة:</span>
+                            <button onclick="insertSnippet('inputLoopHeader', 'for row in rows:')" class="bg-white hover:bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-lg border border-indigo-200 font-mono transition">for row in rows:</button>
+                            <button onclick="insertSnippet('inputLoopBody', '    print(row)')" class="bg-white hover:bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-lg border border-indigo-200 font-mono transition">print(row)</button>
+                        </div>
+                    </div>
+
+                    <!-- أزرار الإجراء والتحقق الفوري -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-slate-100">
+                        <button id="executeBtn" onclick="validateAndRun()" 
+                            class="w-full sm:flex-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2 text-sm glow-effect">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            <span>تحقق من صحة الحل ونفّذ الكود ▶</span>
+                        </button>
+                        <button onclick="autoFillSolution()" class="w-full sm:w-auto bg-pink-100 hover:bg-pink-200 text-pink-700 font-bold py-3.5 px-4 rounded-2xl transition text-xs flex items-center justify-center gap-1">
+                            <span>💡 تلميح الحل النموذجي</span>
+                        </button>
+                        <button onclick="clearTypingFields()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 px-4 rounded-2xl transition text-xs flex items-center justify-center gap-1">
+                            <span>🗑️ مسح</span>
+                        </button>
+                    </div>
+
+                    <!-- صندوق الملاحظات التوجيهية الذكي -->
+                    <div id="validationFeedback" class="mt-4 p-3.5 rounded-2xl text-xs font-bold hidden transition-all duration-300">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- العمود الأيسر: محرر الكود الحي المكتمل ومحاكي التنفيذ والنتائج -->
+            <div class="lg:col-span-5 space-y-5">
+                
+                <!-- بطاقة محاكي الكود البرمجي (data_select2.py) -->
+                <div class="bg-slate-900 rounded-3xl p-5 text-white shadow-xl border-2 border-slate-800 relative">
+                    <!-- عنوان نافذة الكود -->
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                            <span class="text-xs text-slate-400 font-mono mr-2">data_select2.py</span>
+                        </div>
+                        <span class="text-[11px] bg-indigo-900/60 text-indigo-300 px-2 py-0.5 rounded-md font-mono">معاينة فورية لما تكتبينه</span>
+                    </div>
+
+                    <!-- أسطر الكود البرمجي مع إظهار ما تكتبه الطالبة حياً -->
+                    <div class="code-font text-xs md:text-sm space-y-1 text-slate-300 overflow-x-auto py-1">
+                        <div><span class="text-pink-400">import</span> sqlite3</div>
+                        <div class="text-slate-500"># Connect to the database</div>
+                        <div>connection = sqlite3.connect(<span class="text-amber-300">'Kuwait_landmarks.db'</span>)</div>
+                        <div>cursor = connection.cursor()</div>
+                        
+                        <div class="text-slate-500 mt-2"># 1. Data Retrieval</div>
+                        <div class="p-1 rounded bg-slate-800/80 border border-slate-700/60">
+                            <span class="text-pink-300">cursor</span>.execute(<span id="liveSlotQuery" class="text-amber-300 font-bold underline decoration-dotted decoration-pink-400">/* جملة الاستعلام التي تكتبينها */</span>)
+                        </div>
+                        
+                        <div class="text-slate-500 mt-2"># 2. Fetch the Data</div>
+                        <div class="p-1 rounded bg-slate-800/80 border border-slate-700/60">
+                            <span id="liveSlotFetch" class="text-purple-300 font-bold underline decoration-dotted decoration-purple-400">/* أمر استرجاع الصفوف */</span>
+                        </div>
+                        
+                        <div class="text-slate-500 mt-2"># 3. Output the Data</div>
+                        <div class="p-1 rounded bg-slate-800/80 border border-slate-700/60">
+                            <div id="liveSlotLoopHeader" class="text-indigo-300 font-bold underline decoration-dotted decoration-indigo-400">/* حلقة التكرار for */</div>
+                            <div id="liveSlotLoopBody" class="text-indigo-200 font-bold pl-4">/* أمر الطباعة print */</div>
+                        </div>
+                        
+                        <div class="text-slate-500 mt-2"># Close the database</div>
+                        <div>connection.close()</div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                        <span>الحالة البرمجية:</span>
+                        <span id="codeLiveStatus" class="text-amber-400 font-bold">بانتظار اكتمال الكتابة</span>
+                    </div>
+                </div>
+
+                <!-- شاشة نتائج الاستعلام (Terminal + المعالم المصورة) -->
+                <div class="bg-white rounded-3xl p-5 border border-pink-200 shadow-sm" id="resultsSection">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                            <span>🖥️</span> معاينة نتائج التنفيذ (Terminal Output)
+                        </h4>
+                        <span id="statusIndicator" class="text-[11px] font-bold text-slate-400">بانتظار أمر التنفيذ</span>
+                    </div>
+
+                    <!-- موجه المخرجات -->
+                    <div id="terminalScreen" class="bg-slate-950 text-emerald-400 font-mono text-xs p-3.5 rounded-2xl min-h-[95px] mb-4 flex flex-col justify-center items-center text-center">
+                        <span class="text-slate-500">اكتبي الحل في الخانات ثم اضغطي "تحقق من صحة الحل ونفّذ الكود" لرؤية النتيجة الفعلية هنا...</span>
+                    </div>
+
+                    <!-- المعالم الثقافية المسترجعة في الكويت مع صور توضيحية جميلة -->
+                    <div id="landmarksCards" class="hidden space-y-3">
+                        <h5 class="text-xs font-black text-slate-500 uppercase tracking-wider">المعالم الثقافية المسترجعة من قاعدة البيانات (Cultural):</h5>
+                        
+                        <!-- المعلم 1: مركز الشيخ جابر الأحمد الثقافي -->
+                        <div class="flex items-center gap-3 bg-gradient-to-r from-pink-50 to-purple-50 p-2.5 rounded-2xl border border-pink-200">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden bg-pink-200 shrink-0 shadow-inner flex items-center justify-center text-2xl">
+                                🎭
+                            </div>
+                            <div class="text-xs space-y-0.5">
+                                <span class="bg-pink-600 text-white font-bold px-2 py-0.2 rounded-md text-[10px]">سجل 1</span>
+                                <h6 class="font-extrabold text-slate-800 text-sm">Sheikh Jaber Al-Ahmad Cultural Center</h6>
+                                <p class="text-slate-500 font-medium">مركز الشيخ جابر الأحمد الثقافي (دار الأوبرا)</p>
+                                <div class="flex gap-2 text-[11px] text-pink-700 font-bold">
+                                    <span>الفئة: Cultural</span>
+                                    <span>• سنة الإنشاء: 2016</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- المعلم 2: مكتبة الكويت الوطنية -->
+                        <div class="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-indigo-50 p-2.5 rounded-2xl border border-purple-200">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden bg-purple-200 shrink-0 shadow-inner flex items-center justify-center text-2xl">
+                                📚
+                            </div>
+                            <div class="text-xs space-y-0.5">
+                                <span class="bg-purple-600 text-white font-bold px-2 py-0.2 rounded-md text-[10px]">سجل 2</span>
+                                <h6 class="font-extrabold text-slate-800 text-sm">Kuwait National Library</h6>
+                                <p class="text-slate-500 font-medium">مكتبة الكويت الوطنية (المرقاب)</p>
+                                <div class="flex gap-2 text-[11px] text-purple-700 font-bold">
+                                    <span>الفئة: Cultural</span>
+                                    <span>• سنة التأسيس: 1923</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ملخص المعرفة للمتعلمة -->
+        <div class="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-3xl p-6 text-white shadow-lg">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="space-y-1 text-center md:text-right">
+                    <h3 class="text-lg md:text-xl font-black">💡 تذكري يا ذكية:</h3>
+                    <p class="text-purple-100 text-xs md:text-sm leading-relaxed max-w-3xl">
+                        • الدالة <code class="bg-white/20 px-1.5 py-0.5 rounded font-mono">fetchall()</code> تقوم باسترجاع جميع الصفوف الناتجة من تنفيذ الاستعلام وتخزينها في قائمة (List) من الصفوف (Tuples).<br>
+                        • نستخدم جملة <code class="bg-white/20 px-1.5 py-0.5 rounded font-mono">for row in rows:</code> للمرور على السجلات واحداً تلو الآخر وطباعة كل صف في سطر منفصل.
+                    </p>
+                </div>
+                <button onclick="resetActivity()" class="bg-white text-purple-700 hover:bg-purple-50 px-5 py-2.5 rounded-2xl font-bold text-xs shadow-md transition shrink-0">
+                    🔄 إعادة النشاط
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- تذييل الصفحة -->
+    <footer class="bg-white/80 border-t border-pink-200 py-3 text-center text-xs text-slate-500 mt-6">
+        وزارة التربية - دولة الكويت • التوجيه الفني العام للحاسوب • الصف الحادي عشر (الوحدة الأولى: المعالجة الرقمية)
+    </footer>
+
+    <!-- تأثير الاحتفال بالصوت والكونفيتي (مبني بدون مكتبات خارجية مقطوعة) -->
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <script>
+        // حالة النشاط
+        const state = {
+            step1Valid: false,
+            step2Valid: false,
+            step3Valid: false,
+            score: 0,
+            studentName: '',
+            studentClass: ''
+        };
+
+        // توليد أصوات تفاعلية ناعمة باستخدام Web Audio API
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function playTone(freq, type, duration) {
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type || 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Audio not allowed or failed
+            }
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'triangle', 0.15); // C5
+            setTimeout(() => playTone(659.25, 'triangle', 0.15), 100); // E5
+            setTimeout(() => playTone(783.99, 'triangle', 0.25), 200); // G5
+        }
+
+        function playWinFanfare() {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, index) => {
+                setTimeout(() => playTone(freq, 'sine', 0.3), index * 120);
+            });
+        }
+
+        function playErrorSound() {
+            playTone(220, 'sawtooth', 0.25);
+        }
+
+        // تحديث بيانات الطالبة في الشهادة والرأس
+        function updateStudentInfo() {
+            const name = document.getElementById('studentNameInput').value.trim();
+            const sClass = document.getElementById('studentClassInput').value.trim();
+            state.studentName = name || 'المتعلمة المتميزة';
+            state.studentClass = sClass || '١١';
+            document.getElementById('certName').innerText = state.studentName;
+            document.getElementById('certClass').innerText = state.studentClass;
+        }
+
+        // إدراج جزء من النص عند الضغط على أزرار المساعدة السريعة
+        function insertSnippet(targetInputId, text) {
+            const input = document.getElementById(targetInputId);
+            if (input) {
+                input.value = text;
+                onStudentTyping();
+                input.focus();
+            }
+        }
+
+        // تحديث الكود الحي في نافذة البايثون أثناء كتابة الطالبة
+        function onStudentTyping() {
+            const qVal = document.getElementById('inputQuery').value.trim();
+            const fVal = document.getElementById('inputFetch').value.trim();
+            const lHVal = document.getElementById('inputLoopHeader').value.trim();
+            const lBVal = document.getElementById('inputLoopBody').value.trim();
+
+            const liveSlotQuery = document.getElementById('liveSlotQuery');
+            const liveSlotFetch = document.getElementById('liveSlotFetch');
+            const liveSlotLoopHeader = document.getElementById('liveSlotLoopHeader');
+            const liveSlotLoopBody = document.getElementById('liveSlotLoopBody');
+            const statusBadge = document.getElementById('typingStatusBadge');
+            const codeStatus = document.getElementById('codeLiveStatus');
+
+            // تحديث جملة الاستعلام
+            if (qVal) {
+                // إزالة علامات التنصيص إن أضافتها الطالبة لمنع التكرار
+                const cleanQ = qVal.replace(/^["']|["']$/g, '');
+                liveSlotQuery.innerText = `"${cleanQ}"`;
+                liveSlotQuery.className = "text-amber-300 font-bold";
+            } else {
+                liveSlotQuery.innerText = '/* جملة الاستعلام التي تكتبينها */';
+                liveSlotQuery.className = "text-amber-300/60 underline decoration-dotted";
+            }
+
+            // تحديث أمر الجلب
+            if (fVal) {
+                liveSlotFetch.innerText = fVal;
+                liveSlotFetch.className = "text-purple-300 font-bold";
+            } else {
+                liveSlotFetch.innerText = '/* أمر استرجاع الصفوف */';
+                liveSlotFetch.className = "text-purple-300/60 underline decoration-dotted";
+            }
+
+            // تحديث الحلقة
+            if (lHVal) {
+                liveSlotLoopHeader.innerText = lHVal;
+                liveSlotLoopHeader.className = "text-indigo-300 font-bold";
+            } else {
+                liveSlotLoopHeader.innerText = '/* حلقة التكرار for */';
+                liveSlotLoopHeader.className = "text-indigo-300/60 underline decoration-dotted";
+            }
+
+            if (lBVal) {
+                liveSlotLoopBody.innerText = lBVal;
+                liveSlotLoopBody.className = "text-indigo-200 font-bold pl-4";
+            } else {
+                liveSlotLoopBody.innerText = '/* أمر الطباعة print */';
+                liveSlotLoopBody.className = "text-indigo-200/60 pl-4";
+            }
+
+            if (qVal || fVal || lHVal || lBVal) {
+                statusBadge.innerText = "جاري كتابة الحل...";
+                statusBadge.className = "text-xs bg-amber-50 text-amber-700 font-bold px-3 py-1 rounded-full border border-amber-200";
+                codeStatus.innerText = "تعديل نشط ✏️";
+                codeStatus.className = "text-amber-400 font-bold";
+            }
+        }
+
+        // التحقق الذكي من حل المتعلمة وتشغيل البرنامج
+        function validateAndRun() {
+            const qVal = document.getElementById('inputQuery').value.trim();
+            const fVal = document.getElementById('inputFetch').value.trim();
+            const lHVal = document.getElementById('inputLoopHeader').value.trim();
+            const lBVal = document.getElementById('inputLoopBody').value.trim();
+            const feedback = document.getElementById('validationFeedback');
+
+            // تنظيف المدخلات وتوحيد المسافات
+            const normQ = qVal.replace(/\s+/g, ' ').toLowerCase();
+            const normF = fVal.replace(/\s+/g, '').toLowerCase();
+            const normLH = lHVal.replace(/\s+/g, ' ').toLowerCase();
+            const normLB = lBVal.replace(/\s+/g, ' ').toLowerCase();
+
+            // فحص الخطوة 1: الاستعلام SQL
+            const hasSelect = normQ.includes('select');
+            const hasName = normQ.includes('name');
+            const hasYear = normQ.includes('year');
+            const hasLandmarks = normQ.includes('landmarks');
+            const hasCultural = normQ.includes('cultural');
+            const hasCategory = normQ.includes('category');
+
+            if (!hasSelect || !hasName || !hasYear || !hasLandmarks || !hasCultural || !hasCategory) {
+                playErrorSound();
+                feedback.className = "mt-4 p-3.5 rounded-2xl text-xs font-bold bg-rose-50 border border-rose-300 text-rose-700 block animate-bounceShort";
+                if (!hasName || !hasYear) {
+                    feedback.innerHTML = "⚠️ <strong>انتبهي في الخطوة (١):</strong> يجب استرجاع حقلي <code>name</code> و <code>year</code> فقط.";
+                } else if (!hasCultural || !hasCategory) {
+                    feedback.innerHTML = "⚠️ <strong>انتبهي في الخطوة (١):</strong> شرط التصفية المطلوب هو المعالم الثقافية فقط: <code>WHERE category = 'Cultural'</code>.";
+                } else {
+                    feedback.innerHTML = "⚠️ <strong>صيغة الاستعلام غير مكتملة:</strong> تأكدي من كتابة: <code>SELECT name, year FROM landmarks WHERE category = 'Cultural'</code>.";
+                }
+                return;
+            }
+
+            // فحص الخطوة 2: دالة fetchall
+            if (!normF.includes('cursor.fetchall()') || !normF.includes('rows=')) {
+                playErrorSound();
+                feedback.className = "mt-4 p-3.5 rounded-2xl text-xs font-bold bg-purple-50 border border-purple-300 text-purple-700 block animate-bounceShort";
+                feedback.innerHTML = "⚠️ <strong>انتبهي في الخطوة (٢):</strong> المطلوب استرجاع البيانات وتخزينها في متغير <code>rows</code> باستخدام دالة <code>cursor.fetchall()</code>.";
+                return;
+            }
+
+            // فحص الخطوة 3: حلقة التكرار for
+            if (!normLH.includes('for ') || !normLH.includes('in rows') || !normLB.includes('print')) {
+                playErrorSound();
+                feedback.className = "mt-4 p-3.5 rounded-2xl text-xs font-bold bg-indigo-50 border border-indigo-300 text-indigo-700 block animate-bounceShort";
+                feedback.innerHTML = "⚠️ <strong>انتبهي في الخطوة (٣):</strong> اكتبِ الحلقة بصيغة <code>for row in rows:</code> ثم بالسطر التالي <code>print(row)</code>.";
+                return;
+            }
+
+            // إذا كانت جميع الإجابات صحيحة
+            feedback.className = "mt-4 p-3.5 rounded-2xl text-xs font-bold bg-emerald-50 border border-emerald-300 text-emerald-800 block";
+            feedback.innerHTML = "✨ <strong>إجابة نموذجية وممتازة!</strong> كود بايثون مكتوب بشكل سليم تماماً، جاري التنفيذ وعرض النتائج...";
+            
+            document.getElementById('typingStatusBadge').innerText = "تم التحقق بنجاح ✓";
+            document.getElementById('typingStatusBadge').className = "text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300";
+            
+            document.getElementById('codeLiveStatus').innerText = "جاهز وصحيح 100% ✓";
+            document.getElementById('codeLiveStatus').className = "text-emerald-400 font-bold";
+
+            playSuccessSound();
+            executeTerminalSimulation();
+        }
+
+        // محاكاة التنفيذ في شاشة الـ Terminal وإظهار بطاقات المعالم
+        function executeTerminalSimulation() {
+            const terminal = document.getElementById('terminalScreen');
+            const status = document.getElementById('statusIndicator');
+            const cards = document.getElementById('landmarksCards');
+
+            terminal.innerHTML = `<span class="text-amber-400 animate-pulse">جاري الاتصال بقاعدة البيانات الكويتية Kuwait_landmarks.db وتنفيذ الاستعلام...</span>`;
+            status.innerText = "جاري التشغيل...";
+            status.className = "text-[11px] font-bold text-amber-500";
+
+            setTimeout(() => {
+                terminal.innerHTML = `
+                    <div class="text-right w-full font-mono text-xs space-y-1">
+                        <span class="text-slate-400">>>> python data_select2.py</span><br>
+                        <span class="text-pink-400 font-bold">SQL: "SELECT name, year FROM landmarks WHERE category = 'Cultural'"</span><br>
+                        <span class="text-purple-300 font-bold">Fetched: 2 Cultural Landmarks Found</span><br>
+                        <div class="border-t border-slate-800 my-1 pt-1">
+                            <span class="text-emerald-300 font-bold">('Sheikh Jaber Al-Ahmad Cultural Center', 2016)</span><br>
+                            <span class="text-emerald-300 font-bold">('Kuwait National Library', 1923)</span>
+                        </div>
+                        <span class="text-slate-500 text-[10px] mt-1 block">=== اكتمل البرنامج بنجاح بدون أخطاء (Exit code 0) ===</span>
+                    </div>
+                `;
+                status.innerText = "تم التنفيذ بنجاح ✓";
+                status.className = "text-[11px] font-bold text-emerald-600";
+                
+                cards.classList.remove('hidden');
+                cards.scrollIntoView({ behavior: 'smooth' });
+
+                state.score = 100;
+                document.getElementById('scoreText').innerText = "100/100";
+
+                playWinFanfare();
+                triggerConfetti();
+
+                // فتح نافذة التهنئة
+                setTimeout(() => {
+                    updateStudentInfo();
+                    document.getElementById('celebrationModal').classList.remove('hidden');
+                }, 1600);
+
+            }, 1100);
+        }
+
+        // زر تلميح الحل النموذجي
+        function autoFillSolution() {
+            document.getElementById('inputQuery').value = 'SELECT name, year FROM landmarks WHERE category = "Cultural"';
+            document.getElementById('inputFetch').value = 'rows = cursor.fetchall()';
+            document.getElementById('inputLoopHeader').value = 'for row in rows:';
+            document.getElementById('inputLoopBody').value = '    print(row)';
+            onStudentTyping();
+            
+            const feedback = document.getElementById('validationFeedback');
+            feedback.className = "mt-4 p-3.5 rounded-2xl text-xs font-bold bg-pink-50 border border-pink-300 text-pink-700 block";
+            feedback.innerHTML = "💡 <strong>تم إدراج الحل النموذجي!</strong> اضغطي الآن زر <strong>'تحقق من صحة الحل ونفّذ الكود'</strong> لتشغيل البرنامج ورؤية النتائج.";
+        }
+
+        // مسح الخانات
+        function clearTypingFields() {
+            document.getElementById('inputQuery').value = '';
+            document.getElementById('inputFetch').value = '';
+            document.getElementById('inputLoopHeader').value = '';
+            document.getElementById('inputLoopBody').value = '';
+            onStudentTyping();
+            document.getElementById('validationFeedback').classList.add('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('celebrationModal').classList.add('hidden');
+        }
+
+        // إعادة ضبط النشاط للمحاولة مرة أخرى
+        function resetActivity() {
+            clearTypingFields();
+            state.score = 0;
+            document.getElementById('scoreText').innerText = "0/100";
+            document.getElementById('landmarksCards').classList.add('hidden');
+            document.getElementById('terminalScreen').innerHTML = `<span class="text-slate-500">اكتبي الحل في الخانات ثم اضغطي "تحقق من صحة الحل ونفّذ الكود" لرؤية النتيجة الفعلية هنا...</span>`;
+            document.getElementById('statusIndicator').innerText = "بانتظار أمر التنفيذ";
+            document.getElementById('typingStatusBadge').innerText = "بانتظار كتابة الحل";
+            document.getElementById('typingStatusBadge').className = "text-xs bg-pink-50 text-pink-700 font-bold px-3 py-1 rounded-full border border-pink-200";
+            document.getElementById('codeLiveStatus').innerText = "بانتظار اكتمال الكتابة";
+            document.getElementById('codeLiveStatus').className = "text-amber-400 font-bold";
+        }
+
+        // إطلاق قصاصات الاحتفال (Confetti) باستخدام Canvas
+        function triggerConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const numberOfPieces = 130;
+            const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#3b82f6', '#10b981', '#f59e0b'];
+
+            for (let i = 0; i < numberOfPieces; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    rotation: Math.random() * 360,
+                    size: Math.random() * 10 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speed: Math.random() * 4 + 2,
+                    oscSpeed: Math.random() * 0.05 + 0.02
+                });
+            }
+
+            let animationFrame;
+            let timer = 0;
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                timer++;
+
+                pieces.forEach(p => {
+                    p.y += p.speed;
+                    p.rotation += 2;
+                    p.x += Math.sin(timer * p.oscSpeed) * 1.5;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (timer < 250) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            render();
+        }
+
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confettiCanvas');
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
